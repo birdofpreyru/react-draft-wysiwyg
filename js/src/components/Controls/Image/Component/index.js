@@ -26,6 +26,8 @@ class LayoutComponent extends Component {
     showImageLoading: false,
     height: this.props.config.defaultSize.height,
     width: this.props.config.defaultSize.width,
+    // bgImg: this.props.config.defaultBg.bgImg,
+    // bgSpan: this.props.config.defaultBg.bgSpan
   };
 
   componentWillReceiveProps(props: Object): void {
@@ -37,6 +39,8 @@ class LayoutComponent extends Component {
         showImageLoading: false,
         height: this.props.config.defaultSize.height,
         width: this.props.config.defaultSize.width,
+        // bgImg: this.props.config.defaultBg.bgImg,
+        // bgSpan: this.props.config.defaultBg.bgSpan
       })
     } else if (props.config.uploadCallback !== this.props.config.uploadCallback ||
       props.config.uploadEnabled !== this.props.config.uploadEnabled) {
@@ -72,15 +76,15 @@ class LayoutComponent extends Component {
   };
 
   addImageFromState: Function = (): void => {
-    const { imgSrc, height, width } = this.state;
+    const { imgSrc, height, width, bgImg, bgSpan } = this.state;
     const { onChange } = this.props;
-    onChange(imgSrc, height, width);
+    onChange(imgSrc, height, width, bgImg, bgSpan);
   };
 
   addImageFromSrcLink: Function = (imgSrc: string): void => {
-    const { height, width } = this.state;
+    const { height, width, bgImg, bgSpan } = this.state;
     const { onChange } = this.props;
-    onChange(imgSrc, height, width);
+    onChange(imgSrc, height, width, bgImg, bgSpan);
   };
 
   onImageDrop: Function = (event: Object): void => {
@@ -126,7 +130,7 @@ class LayoutComponent extends Component {
   fileUploadClick = (event) => {
     this.fileUpload = true;
     event.stopPropagation();
-  }
+  };
 
   stopPropagation: Function = (event: Object): void => {
     if (!this.fileUpload) {
@@ -137,8 +141,31 @@ class LayoutComponent extends Component {
     }
   };
 
+  bgImgChange: Function = (event: Object): void => {
+    this.setState({
+      bgImg: true,
+      bgSpan: false,
+    });
+
+    const self = this;
+    setTimeout(() => {
+      self.addImageFromState();
+    }, 100);
+  };
+
+  bgSpanChange: Function = (event: Object): void => {
+    this.setState({
+      bgImg: false,
+      bgSpan: true,
+    });
+    const self = this;
+    setTimeout(() => {
+      self.addImageFromState();
+    }, 100);
+  };
+
   renderAddImageModal(): Object {
-    const { imgSrc, uploadHighlighted, showImageLoading, dragEnter, height, width } = this.state;
+    const { imgSrc, uploadHighlighted, showImageLoading, dragEnter, height, width, bgImg, bgSpan } = this.state;
     const { config: { popupClassName, uploadCallback, uploadEnabled, urlEnabled }, doCollapse, translations } = this.props;
     return (
       <div
@@ -243,6 +270,22 @@ class LayoutComponent extends Component {
             onClick={doCollapse}
           >
             {translations['generic.cancel']}
+          </button>
+        </span>
+        <span className="rdw-image-modal-btn-section">
+          <button
+            className="rdw-image-modal-btn"
+            onClick={this.bgImgChange}
+            disabled={!imgSrc || !height || !width}
+          >
+            {translations['generic.bg']}
+          </button>
+          <button
+            className="rdw-image-modal-btn"
+            onClick={this.bgSpanChange}
+            disabled={!imgSrc || !height || !width}
+          >
+            {translations['generic.spanned']}
           </button>
         </span>
         {showImageLoading ?

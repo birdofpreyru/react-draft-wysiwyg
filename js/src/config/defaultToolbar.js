@@ -106,6 +106,7 @@ export default {
     dropdownClassName: undefined,
     showOpenOptionOnHover: true,
     defaultTargetOption: '_self',
+    defaultButton: false,
     options: ['link', 'unlink'],
     link: { icon: link, className: undefined },
     unlink: { icon: unlink, className: undefined },
@@ -149,6 +150,10 @@ export default {
     defaultSize: {
       height: 'auto',
       width: 'auto',
+    },
+    defaultBg: {
+      bgImg: false,
+      bgSpan: false,
     },
   },
   remove: { icon: eraser, className: undefined, component: undefined },

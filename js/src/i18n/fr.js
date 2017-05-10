@@ -3,6 +3,8 @@ module.exports = {
   // Generic
   'generic.add': 'Ok',
   'generic.cancel': 'Annuler',
+  'generic.bg': 'Background',
+  'generic.spanned': 'Spanned',
 
   // BlockType
   'components.controls.blocktype.h1': 'Titre 1',
@@ -29,10 +31,13 @@ module.exports = {
   // Image
   'components.controls.image.fileUpload': 'Téléchargement',
   'components.controls.image.byURL': 'URL',
+  'components.controls.image.bgImg': 'Background image',
+  'components.controls.image.bgSpan': 'Background spanned image',
   'components.controls.image.dropFileText': 'Glisser une image ou cliquer pour télécharger',
 
   //Link
   'components.controls.link.linkTitle': 'Titre du lien',
   'components.controls.link.linkTarget': 'Cible du lien',
   'components.controls.link.linkTargetOption': 'Ouvrir le lien dans une nouvelle fenêtre',
+  'components.controls.link.linkButton': 'Button link'
 }

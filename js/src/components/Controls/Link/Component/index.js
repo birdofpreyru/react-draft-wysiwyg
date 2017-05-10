@@ -28,6 +28,7 @@ class LayoutComponent extends Component {
     linkTarget: '',
     linkTitle: '',
     linkTargetOption: this.props.config.defaultTargetOption,
+    linkButton: this.props.config.defaultButton,
   };
 
   componentWillReceiveProps(props) {
@@ -37,6 +38,7 @@ class LayoutComponent extends Component {
         linkTarget: '',
         linkTitle: '',
         linkTargetOption: this.props.config.defaultTargetOption,
+        linkButton: this.props.config.defaultButton,
       });
     }
   }
@@ -48,8 +50,8 @@ class LayoutComponent extends Component {
 
   addLink: Function = (): void => {
     const { onChange } = this.props;
-    const { linkTitle, linkTarget, linkTargetOption } = this.state;
-    onChange('link', linkTitle, linkTarget, linkTargetOption);
+    const { linkTitle, linkTarget, linkTargetOption, linkButton } = this.state;
+    onChange('link', linkTitle, linkTarget, linkTargetOption, linkButton);
   };
 
   updateValue: Function = (event: Object): void => {
@@ -64,6 +66,12 @@ class LayoutComponent extends Component {
     });
   };
 
+  updateTargetButton: Function = (event: Object): void => {
+    this.setState({
+      linkButton: event.target.checked,
+    });
+  };
+
   hideModal: Function = (): void => {
     this.setState({
       showModal: false,
@@ -72,31 +80,33 @@ class LayoutComponent extends Component {
 
   signalExpandShowModal = () => {
     const { onExpandEvent, currentState: { link, selectionText } } = this.props;
-    const { linkTargetOption } = this.state;
+    const { linkTargetOption, linkButton } = this.state;
     onExpandEvent();
     this.setState({
       showModal: true,
       linkTarget: link && link.target,
       linkTargetOption: (link && link.targetOption) || linkTargetOption,
+      linkButton: (link && link.linkButton) || linkButton,
       linkTitle: (link && link.title) || selectionText,
     });
   }
 
   forceExpandAndShowModal: Function = (): void => {
     const { doExpand, currentState: { link, selectionText } } = this.props;
-    const { linkTargetOption } = this.state;
+    const { linkTargetOption, linkButton } = this.state;
     doExpand();
     this.setState({
       showModal: true,
       linkTarget: link && link.target,
       linkTargetOption: (link && link.targetOption) || linkTargetOption,
+      linkButton: (link && link.linkButton) || linkButton,
       linkTitle: (link && link.title) || selectionText,
     });
   }
 
   renderAddLinkModal() {
     const { config: { popupClassName }, doCollapse, translations } = this.props;
-    const { linkTitle, linkTarget, linkTargetOption } = this.state;
+    const { linkTitle, linkTarget, linkTargetOption, linkButton } = this.state;
     return (
       <div
         className={classNames('rdw-link-modal', popupClassName)}
@@ -131,6 +141,17 @@ class LayoutComponent extends Component {
           />
           <span>{translations['components.controls.link.linkTargetOption']}</span>
         </span>
+
+        <span className="rdw-link-modal-target-option">
+          <input
+            type="checkbox"
+            defaultChecked={linkButton === true}
+            value={true}
+            onChange={this.updateTargetButton}
+          />
+          <span>{translations['components.controls.link.linkButton']}</span>
+        </span>
+
         <span className="rdw-link-modal-buttonsection">
           <button
             className="rdw-link-modal-btn"

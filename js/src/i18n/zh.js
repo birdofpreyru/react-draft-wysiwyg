@@ -3,6 +3,8 @@ module.exports = {
   // Generic
   'generic.add': '添加',
   'generic.cancel': '取消',
+  'generic.bg': 'Background',
+  'generic.spanned': 'Spanned',
 
   // BlockType
   'components.controls.blocktype.h1': '标题1',
@@ -29,10 +31,13 @@ module.exports = {
   // Image
   'components.controls.image.fileUpload': '来自文件',
   'components.controls.image.byURL': '在线图片',
+  'components.controls.image.bgImg': 'Background image',
+  'components.controls.image.bgSpan': 'Background spanned image',
   'components.controls.image.dropFileText': '点击或者拖拽文件上传',
 
   //Link
   'components.controls.link.linkTitle': '超链接',
   'components.controls.link.linkTarget': '输入链接地址',
   'components.controls.link.linkTargetOption': '在新窗口中打开链接',
+  'components.controls.link.linkButton': 'Button link'
 }

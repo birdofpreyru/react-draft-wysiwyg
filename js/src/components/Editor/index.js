@@ -32,11 +32,15 @@ import getBlockRenderFunc from '../../renderer';
 import defaultToolbar from '../../config/defaultToolbar';
 import localeTranslations from '../../i18n';
 import './styles.css';
-import '../../../../css/Draft.css';
+import './Draft.css';
 
 export default class WysiwygEditor extends Component {
 
   static propTypes = {
+    onBGImage: PropTypes.func,
+    onBGSpan: PropTypes.func,
+    themr: PropTypes.object,
+    imageAlign: PropTypes.func,
     onChange: PropTypes.func,
     onEditorStateChange: PropTypes.func,
     onContentStateChange: PropTypes.func,
@@ -97,6 +101,7 @@ export default class WysiwygEditor extends Component {
       editorFocused: false,
       toolbar,
     };
+    const { onBGImage, onBGSpan, imageAlign } = this.props;
     this.wrapperId = `rdw-wrapper${Math.floor(Math.random() * 10000)}`;
     this.modalHandler = new ModalHandler();
     this.focusHandler = new FocusHandler();
@@ -105,6 +110,9 @@ export default class WysiwygEditor extends Component {
       isImageAlignmentEnabled: this.isImageAlignmentEnabled,
       getEditorState: this.getEditorState,
       onChange: this.onChange,
+      onBGImage: onBGImage,
+      onBGSpan: onBGSpan,
+      imageAlign: imageAlign,
     }, props.customBlockRenderFunc);
     this.editorProps = this.filterEditorProps(props);
     this.customStyleMap = getCustomStyleMap();
@@ -122,6 +130,7 @@ export default class WysiwygEditor extends Component {
   componentDidMount(): void {
     this.modalHandler.init(this.wrapperId);
   }
+
   // todo: change decorators depending on properties recceived in componentWillReceiveProps.
 
   componentWillReceiveProps(props) {
@@ -405,24 +414,26 @@ export default class WysiwygEditor extends Component {
         {
           !toolbarHidden &&
           (editorFocused || this.focusHandler.isInputFocused() || !toolbarOnFocus) &&
-          <div
-            className={classNames('rdw-editor-toolbar', toolbarClassName)}
-            style={toolbarStyle}
-            onMouseDown={this.preventDefault}
-            aria-label="rdw-toolbar"
-            aria-hidden={(!editorFocused && toolbarOnFocus).toString()}
-            onFocus={this.onToolbarFocus}
-          >
-            {toolbar.options.map((opt,index) => {
-              const Control = Controls[opt];
-              const config = toolbar[opt];
-              if (opt === 'image' && uploadCallback) {
-                config.uploadCallback = uploadCallback;
-              }
-              return <Control key={index} {...controlProps} config={config} />;
-            })}
-            {toolbarCustomButtons && toolbarCustomButtons.map((button, index) =>
-              React.cloneElement(button, { key: index, ...controlProps }))}
+          <div className="toolbox">
+            <div
+              className={classNames('rdw-editor-toolbar', toolbarClassName)}
+              style={toolbarStyle}
+              onMouseDown={this.preventDefault}
+              aria-label="rdw-toolbar"
+              aria-hidden={(!editorFocused && toolbarOnFocus).toString()}
+              onFocus={this.onToolbarFocus}
+            >
+              {toolbar.options.map((opt,index) => {
+                const Control = Controls[opt];
+                const config = toolbar[opt];
+                if (opt === 'image' && uploadCallback) {
+                  config.uploadCallback = uploadCallback;
+                }
+                return <Control key={index} {...controlProps} config={config} />;
+              })}
+              {toolbarCustomButtons && toolbarCustomButtons.map((button, index) =>
+                React.cloneElement(button, { key: index, ...controlProps }))}
+            </div>
           </div>
         }
         <div

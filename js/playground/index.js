@@ -1,79 +1,56 @@
-/* @flow */
-
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import draftToHtml from 'draftjs-to-html'; // eslint-disable-line import/no-extraneous-dependencies
-import draftToMarkdown from 'draftjs-to-markdown'; // eslint-disable-line import/no-extraneous-dependencies
+import _ from 'lodash';
+import uuid from 'uuid/v4';
+import $ from "jquery";
+import { themr } from 'react-css-themr';
+import draftToHtml from 'draftjs-to-html'; // eslint-disable-line no-unused-vars
+import draftToMarkdown from 'draftjs-to-markdown'; // eslint-disable-line no-unused-vars
 import {
-  convertFromHTML,
-  convertToRaw,
-  ContentState,
-  EditorState,
+  convertFromHTML, // eslint-disable-line no-unused-vars
+  convertToRaw, // eslint-disable-line no-unused-vars
+  ContentState, // eslint-disable-line no-unused-vars
+  EditorState, // eslint-disable-line no-unused-vars
 } from 'draft-js';
 import { Editor } from '../src';
+// import { Editor } from '../../components/Editor/react-draft-wysiwyg';
+// import editorStyles from '../../components/Editor/react-draft-wysiwyg.css'; // eslint-disable-line no-unused-vars
 import styles from './styles.css'; // eslint-disable-line no-unused-vars
 
-class TestOption extends Component {
-  render() {
-    return <div>testing</div>;
-  }
-}
-
-class TestOption2 extends Component {
-  render() {
-    return <div>resting</div>;
-  }
-}
-
-const contentBlocks = convertFromHTML('<p><p>Lorem ipsum ' +
-      'dolor sit amet, consectetur adipiscing elit. Mauris tortor felis, volutpat sit amet ' +
-      'maximus nec, tempus auctor diam. Nunc odio elit,  ' +
-      'commodo quis dolor in, sagittis scelerisque nibh. ' +
-      'Suspendisse consequat, sapien sit amet pulvinar  ' +
-      'tristique, augue ante dapibus nulla, eget gravida ' +
-      'turpis est sit amet nulla. Vestibulum lacinia mollis  ' +
-      'accumsan. Vivamus porta cursus libero vitae mattis. ' +
-      'In gravida bibendum orci, id faucibus felis molestie ac.  ' +
-      'Etiam vel elit cursus, scelerisque dui quis, auctor risus.</p><img src="http://i.imgur.com/aMtBIep.png" /></p>');
-
-const contentState = ContentState.createFromBlockArray(contentBlocks);
-
-// const rawContentState = convertToRaw(contentState);
-
-const rawContentState = {"entityMap":{},"blocks":[{"key":"3q6ro","text":"testing","type":"header-six","depth":0,"inlineStyleRanges":[{"offset":0,"length":7,"style":"fontsize-24"},{"offset":0,"length":7,"style":"fontfamily-Times New Roman"},{"offset":0,"length":7,"style":"color-rgb(209,72,65)"}],"entityRanges":[],"data":{}}]};
-// {"entityMap":{"0":{"type":"IMAGE","mutability":"MUTABLE","data":{"src":"http://i.imgur.com/aMtBIep.png","height":"auto","width":"100%"}}},"blocks":[{"key":"9unl6","text":"","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"95kn","text":" ","type":"atomic","depth":0,"inlineStyleRanges":[],"entityRanges":[{"offset":0,"length":1,"key":0}],"data":{}},{"key":"7rjes","text":"","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}]};
-
 class Playground extends Component {
+  constructor(props) {
+    super(props);
 
-  state: any = {
-    editorContent: undefined,
-    contentState: rawContentState,
-    editorState: EditorState.createEmpty(),
-  };
+    this.state = {
+      rows: [],
+      editorData: {},
+      nextTabIndex: 1,
+      bgImg: ''
+    };
+  }
 
-  onEditorChange: Function = (editorContent) => {
+  onEditorStateChange(editorId, editorState) {
+    const editorData = this.state.editorData;
+    editorData[editorId].editorState = editorState;
     this.setState({
-      editorContent,
+      editorData
     });
   };
 
-  clearContent: Function = () => {
+  onContentChange(editorId, editorContent) {
+    const editorData = this.state.editorData;
+    editorData[editorId].editorContent = editorContent;
     this.setState({
-      contentState: convertToRaw(ContentState.createFromText('')),
+      editorData
     });
   };
 
-  onContentStateChange: Function = (contentState) => {
-    console.log('contentState', contentState);
-  };
+  onBlur(editorId){
 
-  onEditorStateChange: Function = (editorState) => {
-    this.setState({
-      editorState,
-    });
-  };
+  }
 
-  imageUploadCallBack: Function = file => new Promise(
+  imageUploadCallBack(file) {
+    return new Promise(
       (resolve, reject) => {
         const xhr = new XMLHttpRequest(); // eslint-disable-line no-undef
         xhr.open('POST', 'https://api.imgur.com/3/image');
@@ -90,71 +67,240 @@ class Playground extends Component {
           reject(error);
         });
       }
-    );
+    )
+  };
+
+  insertSection(sectionType) {
+    const rowId = uuid();
+    let rowData = {
+      id: rowId,
+      type: sectionType,
+      ids: []
+    };
+
+    switch(sectionType) {
+      case '1C':
+        rowData.ids = [rowId+'-0'];
+        break;
+      case '1:2':
+        rowData.ids = [rowId+'-0', rowId+'-1'];
+        break;
+      case '2:1':
+        rowData.ids = [rowId+'-0', rowId+'-1'];
+        break;
+      case '3C':
+        rowData.ids = [rowId+'-0', rowId+'-1', rowId+'-2'];
+        break;
+    }
+
+    let newEditorData = {};
+    _.each(rowData.ids, (editorId, columnIndex)=>{
+      newEditorData[editorId] = {
+        editorState: undefined,
+        editorContent: undefined
+      };
+    });
+
+    const rows = this.state.rows.concat(rowData);
+    const editorData = _.assign({}, this.state.editorData, newEditorData);
+    const nextTabIndex = this.state.nextTabIndex + 3;
+
+    this.setState({
+      nextTabIndex, rows, editorData
+    });
+  };
+
+  deleteSection(rowDetailsId){
+    if(confirm('Remove this section?')){
+      const oldRows = _.map(this.state.rows, _.clone);
+      const oldEditorData = _.assign({}, this.state.editorData);
+
+      let ids = [];
+      _.each(oldRows, (row) => {
+        if(row.id === rowDetailsId){
+          ids = row.ids;
+        }
+      });
+
+      const rows = _.reject(oldRows, function(row) { return row.id === rowDetailsId });
+      const editorData = _.omit(oldEditorData, ids);
+
+      this.setState({
+        rows, editorData
+      });
+    }
+  }
+
+  save(){
+    localStorage.setItem('rows', JSON.stringify(this.state.rows));
+    localStorage.setItem('editorData', JSON.stringify(this.state.editorData));
+  }
+
+  load(){
+    try{
+      const rows = JSON.parse(localStorage.getItem('rows'));
+      const editorData = JSON.parse(localStorage.getItem('editorData'));
+      this.setState({
+        rows, editorData
+      });
+    }catch(e){
+      console.log(e);
+    }
+  }
+
+  imageAlignHelper(){
+    const self = this;
+    const rows = this.state.rows;
+    const editorData = this.state.editorData;
+
+    try{
+      _.each(rows, (row, rowIndex) => {
+        _.each(row.ids, (id, columnIndex) => {
+          const alignment = editorData[id].imgFloat || 'none';
+          self.imageAlign(id, alignment)
+        });
+      });
+    }catch(e){
+      console.log(e);
+    }
+  }
+
+  setBackgroundImage(editorId, img){
+    const editorData = this.state.editorData;
+    editorData[editorId].bgImg = img;
+
+    const self = this;
+    setTimeout(function () {
+      self.setState({
+        editorData
+      });
+    }, 100);
+  }
+
+  setBackgroundSpannedImage(rowIndex, img){
+    const rows = this.state.rows;
+    rows[rowIndex].bgSpan = img;
+
+    const self = this;
+    setTimeout(function () {
+      self.setState({
+        rows
+      });
+    }, 100);
+  }
+
+  imageAlign(editorId, alignment){
+    const figure = $('.editor-'+ editorId).find('figure');
+    figure.addClass('float-'+ alignment);
+
+    const editorData = this.state.editorData;
+    editorData[editorId].imgFloat = alignment;
+    const self = this;
+    setTimeout(function () {
+      self.setState({
+        editorData
+      });
+    }, 100);
+  }
+
+  loadThemr(){
+    this.setState({
+      themr: {
+        color: 'white',
+        background: 'red'
+      }
+    });
+  }
 
   render() {
-    const { editorContent, contentState, editorState } = this.state;
     return (
       <div className="playground-root">
-        <div className="playground-label">
-          Toolbar is alwasy <sup>visible</sup>
+        <h3>Community Page Editor</h3>
+        <div className="custom-toolbox-wrap">
+          <button className="option-wrapper" onClick={this.insertSection.bind(this, '1C')}>
+            1C
+          </button>
+          <button className="option-wrapper" onClick={this.insertSection.bind(this, '1:2')}>
+            1:2
+          </button>
+          <button className="option-wrapper" onClick={this.insertSection.bind(this, '2:1')}>
+            2:1
+          </button>
+          <button className="option-wrapper" onClick={this.insertSection.bind(this, '3C')}>
+            3C
+          </button>
+          <button className="option-wrapper" onClick={this.save.bind(this)}>
+            Save
+          </button>
+          <button className="option-wrapper" onClick={this.load.bind(this)}>
+            Load
+          </button>
+          <button className="option-wrapper" onClick={this.loadThemr.bind(this)}>
+            Load Themr
+          </button>
         </div>
-        <button onClick={this.clearContent} tabIndex={0}>Force Editor State</button>
-        <div className="playground-editorSection">
-          <input tabIndex={0} />
-          <div className="playground-editorWrapper">
-            <Editor
-              tabIndex={0}
-              initialContentState={rawContentState}
-              toolbarClassName="playground-toolbar"
-              wrapperClassName="playground-wrapper"
-              editorClassName="playground-editor"
-              toolbar={{
-                history: { inDropdown: true },
-                inline: { inDropdown: false },
-                list: { inDropdown: true },
-                link: { showOpenOptionOnHover: false },
-                textAlign: { inDropdown: true },
-                image: { uploadCallback: this.imageUploadCallBack },
-              }}
-              onEditorStateChange={this.onEditorStateChange}
-              onContentStateChange={this.onEditorChange}
-              placeholder="testing"
-              spellCheck
-              toolbarCustomButtons={[<TestOption />, <TestOption2 />]}
-              onFocus={() => {console.log('focus')}}
-              onBlur={() => {console.log('blur')}}
-              onTab={() => {console.log('tab'); return true;}}
-              localization={{ locale: 'zh', translations: {'generic.add': 'Test-Add'} }}
-              mention={{
-                separator: ' ',
-                trigger: '@',
-                caseSensitive: true,
-                suggestions: [
-                  { text: 'A', value: 'AB', url: 'href-a' },
-                  { text: 'AB', value: 'ABC', url: 'href-ab' },
-                  { text: 'ABC', value: 'ABCD', url: 'href-abc' },
-                  { text: 'ABCD', value: 'ABCDDDD', url: 'href-abcd' },
-                  { text: 'ABCDE', value: 'ABCDE', url: 'href-abcde' },
-                  { text: 'ABCDEF', value: 'ABCDEF', url: 'href-abcdef' },
-                  { text: 'ABCDEFG', value: 'ABCDEFG', url: 'href-abcdefg' },
-                ],
-              }}
-            />
-          </div>
-          <input tabIndex={0} />
-          <textarea
-            className="playground-content no-focus"
-            value={draftToHtml(editorContent)}
-          />
-          <textarea
-            className="playground-content no-focus"
-            value={draftToMarkdown(editorContent)}
-          />
-          <textarea
-            className="playground-content no-focus"
-            value={JSON.stringify(editorContent)}
-          />
+        <br/>
+        <div className="custom-editor-wrap">
+
+          {this.state.rows.map((rowDetails, rowIndex) => {
+
+            return <div key={rowDetails.id}
+                        className="playground-editorSection"
+                        style={{
+                          backgroundImage: `url(${this.state.rows[rowIndex].bgSpan || ''})`,
+                          backgroundSize: 'cover'
+                        }}
+            >
+              <button className="custom-button delete-button" onClick={this.deleteSection.bind(this, rowDetails.id)}>X</button>
+
+              {rowDetails.ids.map((editorId, columnIndex) => {
+                if(rowDetails.type){
+                  const className = rowDetails.type === '1:2' && columnIndex === 0 ? 'width-33' :
+                    rowDetails.type === '1:2' && columnIndex === 1 ? 'width-66' :
+                      rowDetails.type === '2:1' && columnIndex === 0 ? 'width-66' :
+                        rowDetails.type === '2:1' && columnIndex === 1 ? 'width-33' :
+                          rowDetails.type === '3C' ? 'width-33' : '';
+
+                  return <div key={editorId}
+                              className={className + " editor-" + editorId + " playground-editorWrapper"}
+                              style={{
+                                backgroundImage: `url(${this.state.editorData[editorId].bgImg || ''})`,
+                                backgroundSize: 'cover'
+                              }}
+                  >
+                    <Editor
+                      toolbarOnFocus
+                      spellCheck
+                      tabIndex={this.state.nextTabIndex}
+                      //editorState={this.state.editorData[editorId].editorState}
+                      initialContentState={this.state.editorData[editorId].editorContent}
+                      toolbarClassName="playground-toolbar"
+                      wrapperClassName="playground-wrapper"
+                      editorClassName="playground-editor"
+                      toolbar={{
+                        history: { inDropdown: true },
+                        inline: { inDropdown: true },
+                        list: { inDropdown: true },
+                        link: { showOpenOptionOnHover: true },
+                        textAlign: { inDropdown: true },
+                        image: { uploadCallback: this.imageUploadCallBack },
+                      }}
+                      onEditorStateChange={this.onEditorStateChange.bind(this, editorId)}
+                      onContentStateChange={this.onContentChange.bind(this, editorId)}
+                      onBlur={this.onBlur.bind(this, editorId)}
+                      onBGImage={this.setBackgroundImage.bind(this, editorId)}
+                      onBGSpan={this.setBackgroundSpannedImage.bind(this, rowIndex)}
+                      imageAlign={this.imageAlign.bind(this, editorId)}
+                      themr={this.state.themr}
+                    />
+                  </div>
+                }
+              })}
+
+            </div>
+
+          })}
+
         </div>
       </div>
     );
@@ -162,33 +308,3 @@ class Playground extends Component {
 }
 
 ReactDOM.render(<Playground />, document.getElementById('app')); // eslint-disable-line no-undef
-
-
-/**
-const rawContentState = ;
-
-
-toolbar={{
-  inline: {
-    inDropdown: true,
-  },
-  list: {
-    inDropdown: true,
-  },
-  textAlign: {
-    inDropdown: true,
-  },
-  link: {
-    inDropdown: true,
-  },
-  image: {
-    uploadCallback: this.imageUploadCallBack,
-  },
-  history: {
-    inDropdown: true,
-  },
-}}*/
-// {"entityMap":{},"blocks":
-// [{"key":"3q6ro","text":"testing iehfciwehcwjvbjhsvsvv","type":"header-six","depth":0,"inlineStyleRanges":
-// [{"offset":0,"length":29,"style":"fontsize-24"},{"offset":0,"length":29,"style":"fontfamily-Times New Roman"},{"offset":0,"length":29,"style":"color-rgb(209,72,65)"}],"entityRanges":[],"data":{}},{"key":"6789c","text":"","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}},{"key":"b2fnq","text":"testing","type":"unstyled","depth":0,"inlineStyleRanges":
-// [{"offset":0,"length":7 ,"style":"fontsize-24"},{"offset":0,"length":7, "style":"fontfamily-Times New Roman"},{"offset":0,"length":7,"style":"color-rgb(209,72,65)"}],"entityRanges":[],"data":{}}]}

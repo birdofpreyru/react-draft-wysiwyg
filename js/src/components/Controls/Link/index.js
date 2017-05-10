@@ -76,8 +76,10 @@ class Link extends Component {
     if (currentEntity && (contentState.getEntity(currentEntity).get('type') === 'LINK')) {
       currentValues.link = {};
       const entityRange = currentEntity && getEntityRange(editorState, currentEntity);
+
       currentValues.link.target = currentEntity && contentState.getEntity(currentEntity).get('data').url;
       currentValues.link.targetOption = currentEntity && contentState.getEntity(currentEntity).get('data').target;
+      currentValues.link.linkButton = currentEntity && contentState.getEntity(currentEntity).get('data').button;
       currentValues.link.title = (entityRange && entityRange.text);
     }
     currentValues.selectionText = getSelectionText(editorState);
@@ -90,9 +92,9 @@ class Link extends Component {
     });
   };
 
-  onChange = (action, title, target, targetOption) => {
+  onChange = (action, title, target, targetOption, linkButton) => {
     if (action === 'link') {
-      this.addLink(title, target, targetOption);
+      this.addLink(title, target, targetOption, linkButton);
     } else {
       this.removeLink();
     }
@@ -112,7 +114,7 @@ class Link extends Component {
     }
   };
 
-  addLink: Function = (linkTitle, linkTarget, linkTargetOption): void => {
+  addLink: Function = (linkTitle, linkTarget, linkTargetOption, linkButton): void => {
     const { editorState, onChange } = this.props;
     const { currentEntity } = this.state;
     let selection = editorState.getSelection();
@@ -126,7 +128,7 @@ class Link extends Component {
     }
     const entityKey = editorState
       .getCurrentContent()
-      .createEntity('LINK', 'MUTABLE', { url: linkTarget, target: linkTargetOption })
+      .createEntity('LINK', 'MUTABLE', { url: linkTarget, target: linkTargetOption, button: linkButton })
       .getLastCreatedEntityKey();
 
     let contentState = Modifier.replaceText(

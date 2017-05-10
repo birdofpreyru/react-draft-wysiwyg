@@ -47,7 +47,7 @@ function getLinkComponent(config) {
 
     render() {
       const { children, entityKey, contentState } = this.props;
-      const { url, title, targetOption } = contentState.getEntity(entityKey).getData();
+      const { url, title, targetOption, button } = contentState.getEntity(entityKey).getData();
       const { showPopOver } = this.state;
       return (
         <span
@@ -55,8 +55,8 @@ function getLinkComponent(config) {
           onMouseEnter={this.toggleShowPopOver}
           onMouseLeave={this.toggleShowPopOver}
         >
-          <a href={url} target={targetOption}>{children}</a>
-          {showPopOver && showOpenOptionOnHover ?
+          <a href={url} target={targetOption} className={button ? 'link button-link' : 'link'} onClick={() => button ? this.openLink() : {}}>{children}</a>
+          {showPopOver && showOpenOptionOnHover && !button ?
             <img
               src={openlink}
               alt=""

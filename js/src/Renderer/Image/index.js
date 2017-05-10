@@ -31,13 +31,15 @@ const getImageComponent = (config) => {
     };
 
     setEntityAlignment: Function = (alignment): void => {
+      config.imageAlign(alignment);
+
       const { block, contentState } = this.props;
       const entityKey = block.getEntityAt(0);
       contentState.mergeEntityData(
         entityKey,
         { alignment }
       );
-      config.onChange(EditorState.push(config.getEditorState(), contentState, 'change-block-data'))
+      config.onChange(EditorState.push(config.getEditorState(), contentState, 'change-block-data'));
       this.setState({
         dummy: true,
       });
@@ -85,11 +87,20 @@ const getImageComponent = (config) => {
     render(): Object {
       const { block, contentState } = this.props;
       const { hovered } = this.state;
-      const { isReadOnly, isImageAlignmentEnabled } = config;
+      const { isReadOnly, isImageAlignmentEnabled, onBGImage, onBGSpan, imageAlign } = config;
       const entity = contentState.getEntity(block.getEntityAt(0));
-      const { src, alignment, height, width } = entity.getData();
+      const { src, alignment, height, width, bgImg, bgSpan } = entity.getData();
+
+      if(bgImg){
+        onBGImage(src);
+      }
+
+      if(bgSpan){
+        onBGSpan(src);
+      }
 
       return (
+        !bgImg && !bgSpan ?
         <span
           onMouseEnter={this.toggleHovered}
           onMouseLeave={this.toggleHovered}
@@ -119,6 +130,7 @@ const getImageComponent = (config) => {
             }
           </span>
         </span>
+          : <span></span>
       );
     }
   }

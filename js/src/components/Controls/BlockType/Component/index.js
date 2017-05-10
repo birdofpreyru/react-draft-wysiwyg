@@ -32,12 +32,12 @@ class LayoutComponent extends Component {
     { label: 'Blockquote', displayName: this.props.translations['components.controls.blocktype.blockquote'] },
   ];
 
-  renderFlat(blocks: Array<Object>): void {
+  renderFlat(): void {
     const { config: { className }, onChange, currentState: { blockType } } = this.props;
     return (
       <div className={classNames('rdw-inline-wrapper', className)}>
         {
-        blocks.map((block, index) =>
+        this.blocksTypes.map((block, index) =>
           <Option
             key={index}
             value={block.label}
@@ -52,7 +52,7 @@ class LayoutComponent extends Component {
     );
   }
 
-  renderInDropdown(blocks: Array<Object>): void {
+  renderInDropdown(): void {
     const {
       config: { className, dropdownClassName },
       currentState: { blockType },
@@ -78,7 +78,7 @@ class LayoutComponent extends Component {
         >
           <span>{currentLabel || translations['components.controls.blocktype.blocktype']}</span>
           {
-            blocks.map((block, index) =>
+            this.blocksTypes.map((block, index) =>
               <DropdownOption
                 active={blockType === block.label}
                 value={block.label}
