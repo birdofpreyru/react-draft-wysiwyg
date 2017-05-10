@@ -74,7 +74,6 @@
     "build": "npm run clean && npm run build:webpack",
     "test": "cross-env BABEL_ENV=test mocha --compilers js:config/test-compiler.js config/test-setup.js js/**/*Test.js",
     "lint": "eslint js",
-    "postinstall": "npm run build:webpack",
     "flow": "flow; test $? -eq 0 -o $? -eq 2",
     "check": "npm run lint && npm run flow",
     "start": "node config/server.dev.js"
